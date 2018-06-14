@@ -2,12 +2,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Optional;
 
 public class ShopService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopService.class);
 
-    public static boolean addGood(Good good) {
+    public static boolean addGood(Good good, String accessToken) {
+
+
+        boolean isUserLoggedIn = Optional.ofNullable(AccountService.getAccessTokens())
+                .map(Collection::stream)
+                .map(stringStream -> stringStream.anyMatch(accessToken::equals))
+                .orElse(false);
+
+        if (!isUserLoggedIn) {
+            return false;
+        }
+
         Good goodInFile = ShopDao.findByName(good.name);
         try {
             if (goodInFile == null) {
@@ -21,7 +34,6 @@ public class ShopService {
             LOGGER.error(e.getMessage(), e);
         }
         return false;
-
     }
 
 }
