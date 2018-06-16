@@ -28,7 +28,7 @@ public class Controller {
                 Account loginPassword = mapper.readValue(body, Account.class);
 
                 String header = AccountService.checkAccount(loginPassword);;
-                response.header("Header", header);
+                response.header("Access-Control-Allow-Headers", header);
                 return header;
 
             } catch (JsonParseException | JsonMappingException e) {
@@ -43,43 +43,37 @@ public class Controller {
     }
 
     private static Route getAllGoodsRoute() {
-        Route getRoute = new Route() {
-            @Override
-            public Object handle(Request request, Response response) throws Exception {
-                String json = mapper.writeValueAsString(ShopDao.findAll());
-                return json;
-            }
+        Route getRoute = (request, response) -> {
+            String json = mapper.writeValueAsString(ShopDao.findAll());
+            return json;
         };
         return getRoute;
     }
 
     private static Route getFindGoodByNameRoute() {
-        Route getRoute = new Route() {
-            @Override
-            public Object handle(Request request, Response response) throws Exception {
-                String goodName = request.queryParams("goodName");
-                if (StringUtils.isBlank(goodName)) {
-                    return "Please specify correct good name";
-                }
-
-                Good good = ShopDao.findByName(goodName);
-                if (good == null) {
-                    return "Good with name " + goodName + " not found";
-                }
-
-                String json = mapper.writeValueAsString(good);
-                return json;
+        Route getRoute = (request, response) -> {
+            String goodName = request.queryParams("goodName");
+            if (StringUtils.isBlank(goodName)) {
+                return "Please specify correct good name";
             }
+
+            Good good = ShopDao.findByName(goodName);
+            if (good == null) {
+                return "Good with name " + goodName + " not found";
+            }
+
+            String json = mapper.writeValueAsString(good);
+            return json;
         };
         return getRoute;
     }
 
     private static Route getAddGoodRoute() {
-        Route postRoute = (request, response) -> {
+        return (Request request, Response response) -> {
             String goodName = request.queryParams("name");
             String count = request.queryParams("count");
             String price = request.queryParams("price");
-            String isValid = validateParametersForGood(goodName, count, price);
+            String isValid = validateParametersForGood(goodName);
             if (StringUtils.isNotBlank(isValid)) {
                 return isValid;
             }
@@ -93,20 +87,14 @@ public class Controller {
             }
             Good good = new Good(goodName, contInt, priceInt);
 
-            String accessToken = request.headers("Header");
+            String accessToken = request.headers("Access-Control-Allow-Headers");
             System.out.println(accessToken);
 
-            boolean result = ShopService.addGood(good, accessToken);
-            if (result) {
-                return "Good was successfully added";
-            } else {
-                return "Something went wrong during adding process";
-            }
+            return ShopService.addGood(good, accessToken);
         };
-        return postRoute;
     }
 
-    public static String validateParametersForGood(String goodName, String count, String price) {
+    public static String validateParametersForGood(String goodName) {
         if (StringUtils.isBlank(goodName)) {
             return "Please specify correct good name";
         }

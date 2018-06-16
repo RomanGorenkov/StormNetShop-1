@@ -38,20 +38,19 @@ public class ShopDao {
         return null;
     }
 
-    public static synchronized boolean save(Good good) {
+    public static synchronized String save(Good good) {
         List<Good> goods = findAll();
         goods.add(good);
-        try {
+        try (FileOutputStream fos = new FileOutputStream("goods.json");) {
             String listOfGoods = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(goods);
-            FileOutputStream fos = new FileOutputStream("goods.json");//открытие потока, для чтения файла.
             fos.write(listOfGoods.getBytes());
             fos.flush();
             fos.close();//закрытие потока
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
-            return false;
+            return e.getMessage() + " during good saving process";
         }
-        return true;
+        return "Good was successfully saved";
 
     }
 

@@ -9,7 +9,7 @@ public class ShopService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShopService.class);
 
-    public static boolean addGood(Good good, String accessToken) {
+    public static String addGood(Good good, String accessToken) {
 
 
         boolean isUserLoggedIn = Optional.ofNullable(AccountService.getAccessTokens())
@@ -18,7 +18,7 @@ public class ShopService {
                 .orElse(false);
 
         if (!isUserLoggedIn) {
-            return false;
+            return "user isn't logged in";
         }
 
         Good goodInFile = ShopDao.findByName(good.name);
@@ -32,8 +32,8 @@ public class ShopService {
             }
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
+            return e.getMessage() + " during adding process";
         }
-        return false;
     }
 
 }

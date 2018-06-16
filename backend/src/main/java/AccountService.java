@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.MissingFormatArgumentException;
 import java.util.Objects;
-import java.util.Random;
 
 public class AccountService {
 
-    private static final Random random = new Random();
+    private static final String SALT = "strormnet";
     private static final List<String> ACCESS_TOKENS = new ArrayList<>();
 
     public static String checkAccount(Account loginPassword) {
@@ -20,19 +19,15 @@ public class AccountService {
             throw new MissingFormatArgumentException("There are no account in JSON");
         }
 
-        if (Objects.equals(loginPassword.getName(), accountJSON.getName()) &&
-                Objects.equals(loginPassword.getPassword(), accountJSON.getPassword())) {
-
-            String randomNumbers = (String.valueOf(random.doubles()));
-            String passordWithRandom = loginPassword.getPassword().concat(randomNumbers);
-            accessToken = DigestUtils.sha1Hex(passordWithRandom);
-            ACCESS_TOKENS.add(accessToken);
-
-            return accessToken;
-
-        } else {
+        if (!Objects.equals(loginPassword.getName(), accountJSON.getName()) ||
+                !Objects.equals(loginPassword.getPassword(), accountJSON.getPassword())) {
             throw new IllegalArgumentException("Incorrect login or pass");
         }
+
+        accessToken = DigestUtils.sha1Hex(loginPassword.getPassword() + SALT);
+        ACCESS_TOKENS.add(accessToken);
+
+        return accessToken;
     }
 
     public static List<String> getAccessTokens() {
