@@ -10,22 +10,27 @@ public class AccountService {
     private static final String SALT = "strormnet";
     private static final List<String> ACCESS_TOKENS = new ArrayList<>();
 
-    public static String checkAccount(Account loginPassword) {
+    public static String checkAccount(Account userEnteredAccount) {
 
         String accessToken;
 
-        Account accountJSON = AccountDao.findLogin(loginPassword.getName());
+        Account accountJSON = AccountDao.findLogin(userEnteredAccount.getName()); //ищем по имени
+        // такой же аккаунт в нашем файле (Базе Данных)
         if (accountJSON == null) {
+            // если не нашли кидаем ошибку
             throw new MissingFormatArgumentException("There are no account in JSON");
         }
 
-        if (!Objects.equals(loginPassword.getName(), accountJSON.getName()) ||
-                !Objects.equals(loginPassword.getPassword(), accountJSON.getPassword())) {
+        if (!Objects.equals(userEnteredAccount.getName(), accountJSON.getName()) ||
+                !Objects.equals(userEnteredAccount.getPassword(), accountJSON.getPassword())) {
+            // если введеный логин и пароль не совпадают с тем что у нас в БД тоже кидаем ошибку
             throw new IllegalArgumentException("Incorrect login or pass");
         }
 
-        accessToken = DigestUtils.sha1Hex(loginPassword.getPassword() + SALT);
-        ACCESS_TOKENS.add(accessToken);
+        accessToken = DigestUtils.sha1Hex(userEnteredAccount.getPassword() + SALT);// генерируем токен
+        // путем присоединения к парою специального слово соли и также шерирования полученной строки
+        ACCESS_TOKENS.add(accessToken); // добавляем полученный токен в список токенов которым будет разрешен
+        // доступ к нашей БД
 
         return accessToken;
     }

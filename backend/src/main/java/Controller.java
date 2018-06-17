@@ -24,12 +24,17 @@ public class Controller {
         post("/authorization", (request, response) -> {
 
             try {
-                String body = request.body();
-                Account loginPassword = mapper.readValue(body, Account.class);
+                String body = request.body(); // извлекаем тело запроса
+                // тело запроса это по сути посланный JSON файл с именем и паролем
+//                {
+//                    "name": "admin",
+//                        "password": "qwerty123"
+//                }
+                Account loginPassword = mapper.readValue(body, Account.class); // преобразовываем посланный JSON к нашей модели классу Accoubt
 
-                String header = AccountService.checkAccount(loginPassword);;
-                response.header("Access-Control-Allow-Headers", header);
-                return header;
+                String accessToken = AccountService.checkAccount(loginPassword); // проверяем данные введенные пользователем
+                // и получаем сгенерированный для пользователя токен
+                return accessToken; // возвращаем наш токен
 
             } catch (JsonParseException | JsonMappingException e) {
                 LOGGER.error(e.getMessage(), e);
@@ -70,10 +75,11 @@ public class Controller {
 
     private static Route getAddGoodRoute() {
         return (Request request, Response response) -> {
+            // достаем из запроса параметры товара
             String goodName = request.queryParams("name");
             String count = request.queryParams("count");
             String price = request.queryParams("price");
-            String isValid = validateParametersForGood(goodName);
+            String isValid = validateParametersForGood(goodName); // валидируем параметры товара
             if (StringUtils.isNotBlank(isValid)) {
                 return isValid;
             }
@@ -87,7 +93,7 @@ public class Controller {
             }
             Good good = new Good(goodName, contInt, priceInt);
 
-            String accessToken = request.headers("Access-Control-Allow-Headers");
+            String accessToken = request.headers("Access-Control-Allow-Headers"); // получаем из запроса токен пользователя
             System.out.println(accessToken);
 
             return ShopService.addGood(good, accessToken);
