@@ -31,7 +31,7 @@ public class ShopDao {
     public static synchronized Good findByName(String name) {
         List<Good> goods = findAll();
         for (Good good : goods) {
-            if (good.name.equalsIgnoreCase(name)) {
+            if (good.getName().equalsIgnoreCase(name)) {
                 return good;
             }
         }
@@ -59,7 +59,7 @@ public class ShopDao {
         Iterator<Good> it = goods.iterator();
         while (it.hasNext()) {
             Good el = it.next();
-            if (el.name.equals(name)) {
+            if (el.getName().equals(name)) {
                 it.remove();
             }
         }

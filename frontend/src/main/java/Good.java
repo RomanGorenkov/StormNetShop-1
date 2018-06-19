@@ -22,4 +22,16 @@ public class Good {
     public int getPrice() {
         return price;
     }
+
+    public void increaseCount() {
+        count++;
+    }
+
+    public void decreaseCount() {
+        count--;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 }

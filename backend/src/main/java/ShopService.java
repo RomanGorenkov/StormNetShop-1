@@ -27,13 +27,13 @@ public class ShopService {
             return "user isn't logged in";
         }
 
-        Good goodInFile = ShopDao.findByName(good.name); // пытаемся найти товар с введенным пользователем названием
+        Good goodInFile = ShopDao.findByName(good.getName()); // пытаемся найти товар с введенным пользователем названием
         try {
             if (goodInFile == null) { // если такого товара нет
                 return ShopDao.save(good); // то создаем его
             } else {
-                ShopDao.deleteByName(good.name); // если есть то удаляем
-                Good newGood = new Good(goodInFile.name, goodInFile.count + good.count, good.price);
+                ShopDao.deleteByName(good.getName()); // если есть то удаляем
+                Good newGood = new Good(goodInFile.getName(), goodInFile.getCount() + good.getCount(), good.getPrice());
                 return ShopDao.save(newGood); // и записываем с новыми данными введенными юзером
             }
         } catch (IOException e) {
