@@ -22,4 +22,13 @@ public class Good {
     public int getPrice() {
         return price;
     }
+
+    @Override
+    public String toString() {
+        return "Good{" +
+                "name='" + name + '\'' +
+                ", count=" + count +
+                ", price=" + price +
+                '}';
+    }
 }

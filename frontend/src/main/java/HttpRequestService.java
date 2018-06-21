@@ -58,17 +58,12 @@ public class HttpRequestService {
         return MAPPER.readValue(response.toString(), typeReference);
     }
 
-    // HTTP POST request
-    public void sendPost(String url, String json, String access_Token) throws IOException {
-
-        //String json = mapper.writeValueAsString(listOfGoods);
-
+    public static StringBuffer sendPostAndGetResponse(String url, String json) throws IOException {
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         //add reuqest header
         con.setRequestMethod("POST");
-        con.setRequestProperty("Header", access_Token);
 
         // Send post request
         con.setDoOutput(true);
@@ -77,15 +72,14 @@ public class HttpRequestService {
         wr.flush();
         wr.close();
 
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
         StringBuffer response = new StringBuffer();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
         }
-        in.close();
+       return response;
 
 //        accessToken = response.toString();
     }

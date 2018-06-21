@@ -8,6 +8,8 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+import java.io.IOException;
+
 import static spark.Spark.*;
 
 public class Controller {
@@ -17,6 +19,7 @@ public class Controller {
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static void main(String[] args) {
+        staticFileLocation("/");
 
         get("/getAllGoods", getAllGoodsRoute());
         get("/findGoodByName", getFindGoodByNameRoute());
@@ -75,42 +78,21 @@ public class Controller {
 
     private static Route getAddGoodRoute() {
         return (Request request, Response response) -> {
-            // достаем из запроса параметры товара
-            String goodName = request.queryParams("name");
-            String count = request.queryParams("count");
-            String price = request.queryParams("price");
-            String isValid = validateParametersForGood(goodName); // валидируем параметры товара
-            if (StringUtils.isNotBlank(isValid)) {
-                return isValid;
-            }
-            Integer priceInt = convertStringToInt(price);
-            if (priceInt == null) {
-                return "Please specify price as a number";
-            }
-            Integer contInt = convertStringToInt(count);
-            if (contInt == null) {
-                return "Please specify count as a number";
-            }
-            Good good = new Good(goodName, contInt, priceInt);
+            try {
+                Good goodFromRequest = mapper.readValue(request.body(), Good.class);
+                System.out.println(goodFromRequest);
+                if (StringUtils.isBlank(goodFromRequest.getName())) {
+                    return "Please specify correct good name";
+                }
 
-            String accessToken = request.headers("Access-Control-Allow-Headers"); // получаем из запроса токен пользователя
-            System.out.println(accessToken);
+                String accessToken = request.headers("Access-Control-Allow-Headers"); // получаем из запроса токен пользователя
+                System.out.println(accessToken);
 
-            return ShopService.addGood(good, accessToken);
+                return ShopService.addGood(goodFromRequest, accessToken);
+            } catch (IOException e) {
+                return e.getMessage();
+            }
         };
-    }
-
-    public static String validateParametersForGood(String goodName) {
-        if (StringUtils.isBlank(goodName)) {
-            return "Please specify correct good name";
-        }
-        if (StringUtils.isBlank(goodName)) {
-            return "Please specify correct good count";
-        }
-        if (StringUtils.isBlank(goodName)) {
-            return "Please specify correct good price";
-        }
-        return StringUtils.EMPTY;
     }
 
     public static Integer convertStringToInt(String string) {

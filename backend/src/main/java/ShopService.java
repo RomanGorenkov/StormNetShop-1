@@ -21,6 +21,7 @@ public class ShopService {
                 .map(stringStream -> stringStream.anyMatch(accessToken::equals)) //с помощью anyMatch ищем совпадение в потоке с
                 // токеном пользователя, если оно найдется вернется true
                 .orElse(false);
+        System.out.println("isUserLoggedIn = " + isUserLoggedIn);
 
         // если такого токена у нас нет то возвращаем false
         if (!isUserLoggedIn) {

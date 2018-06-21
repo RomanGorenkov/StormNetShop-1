@@ -9,14 +9,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,13 +49,13 @@ public class AppClient extends Application {
     private static TextField priceOfGoodAddToShop = new TextField();
     private static Button buttonAddGoods = new Button();
 
-    //авторизация
-//    private static Label labelNickNameAndPassword = new Label("Введите ваш логин и пароль");
-//    private static Label labelLogin = new Label("User Name");
-//    private static TextField authorizationName = new TextField();
-//    private static Label labelPassword = new Label("Password");
-//    private static PasswordField authorizationPassword = new PasswordField();
-//    private static Button buttonEnter = new Button();
+    //    авторизация
+    private static Label labelNickNameAndPassword = new Label("Введите ваш логин и пароль");
+    private static Label labelLogin = new Label("User Name");
+    private static TextField authorizationName = new TextField();
+    private static Label labelPassword = new Label("Password");
+    private static PasswordField authorizationPassword = new PasswordField();
+    private static Button buttonEnter = new Button();
 
     //urlResponse
     private static Button connectionUrlAddress = new Button("OK");
@@ -71,13 +72,15 @@ public class AppClient extends Application {
     private static TableView<Good> listCarts = new TableView<>(cartOfProduct);
 
     private Stage windowForAddGoods = new Stage();
-//    private Stage authorization = new Stage();
+    private Stage authorization = new Stage();
     private Stage primaryStage = new Stage();
     private Stage urlAddress = new Stage();
     private FlowPane rootBuyGood = new FlowPane();
     private FlowPane rootAddGood = new FlowPane();
-//    private GridPane rootAuthorization = new GridPane();
+    private GridPane rootAuthorization = new GridPane();
     private FlowPane rootUrlConnection = new FlowPane();
+
+    private StringBuffer accessToken;
 
     public AppClient() {
     }
@@ -89,7 +92,7 @@ public class AppClient extends Application {
     @Override
     public void start(Stage app) throws Exception {
         connectToServer();
-//        setAuthRootPane();
+        setAuthRootPane();
         buyButtons();
         addGoods();
         windowsApplication();
@@ -102,13 +105,13 @@ public class AppClient extends Application {
         rootsPanel.rootUrlConnection(rootUrlConnection);
     }
 
-//    private void setAuthRootPane() {
-//        //логин пароль
-//        //авторизация, корневой узел
-//        buttonEnter.setText("Login");
-//        buttonEnter.setOnAction(authorizationEvent);
-//        rootsPanel.rootAuthorization(rootAuthorization);
-//    }
+    private void setAuthRootPane() {
+        //логин пароль
+        //авторизация, корневой узел
+        buttonEnter.setText("Login");
+        buttonEnter.setOnAction(authorizationEvent);
+        rootsPanel.rootAuthorization(rootAuthorization);
+    }
 
     private void buyButtons() {
 
@@ -148,8 +151,8 @@ public class AppClient extends Application {
         //цена товара при добавлении в магазин
         priceOfGoodAddToShop.setMaxWidth(ProportionsConfigs.TEXT_FIELS_ADD_GOOD_COUNTandPRICE);
         //добавить товар в магазин
-//        buttonAddGoods.setText("Добавить товар");
-//        buttonAddGoods.setOnAction(addGoodEvent);
+        buttonAddGoods.setText("Добавить товар");
+        buttonAddGoods.setOnAction(addGoodEvent);
         //обновление состояние листов
         buttonUpdateListForBuyGoods.setText("Обновить");
         buttonUpdateListForBuyGoods.setOnAction(updateEvent);
@@ -164,8 +167,8 @@ public class AppClient extends Application {
         windowForAddGoods.setTitle("Add goods");
         windowForAddGoods.setScene(new Scene(rootAddGood, ProportionsConfigs.SCENE_ADD_GOODS_WIDHT, ProportionsConfigs.SCENE_ADD_GOODS_HEIGHT));
         //окно для регистрации
-//        authorization.setTitle("Authorization");
-//        authorization.setScene(new Scene(rootAuthorization, ProportionsConfigs.SCENE_LOGIN_GOODS_WIDHT, ProportionsConfigs.SCENE_LOGIN_GOODS_HEIGHT));
+        authorization.setTitle("Authorization");
+        authorization.setScene(new Scene(rootAuthorization, ProportionsConfigs.SCENE_LOGIN_GOODS_WIDHT, ProportionsConfigs.SCENE_LOGIN_GOODS_HEIGHT));
         //окно для urlConnection
         urlAddress.setTitle("Url response");
         urlAddress.setScene(new Scene(rootUrlConnection, ProportionsConfigs.SCENE_URL_CONNECTION_WIDHT, ProportionsConfigs.SCENE_URL_CONNECTION_HEIGHT));
@@ -184,7 +187,7 @@ public class AppClient extends Application {
             intializeListCart();
             //открытие окон
             primaryStage.show();
-//            authorization.show();
+            authorization.show();
             //закрытие окна urlConnection
             urlAddress.close();
             //корневой узел buyGoods
@@ -385,30 +388,31 @@ public class AppClient extends Application {
         viewGoodsInShop.setMaxHeight(ProportionsConfigs.LIST_GOODS_TO_ADD_HEIGHT);
     }
 
-//    private EventHandler<ActionEvent> addGoodEvent = new EventHandler<ActionEvent>() {
-//        @Override
-//        public void handle(ActionEvent event) {
-//
-//            try {
-//                String nameOfGood = nameOfGoodAddToShop.getText();
-//                int countOfGood = Integer.parseInt(countOfGoodAddToShop.getText());
-//                int priceOfGood = Integer.parseInt(priceOfGoodAddToShop.getText());
-//
-//                Good addGood = new Good(nameOfGood, countOfGood, priceOfGood);
-//
-//                List<Good> addProduct = new ArrayList<>();
-//                addProduct.add(addGood);
-//
-//                String json = mapper.writeValueAsString(addProduct);
-//                HttpRequestService.sendPost(HttpRequestService.urlConnection.concat("/addGoods"), json, HttpRequestService.accessToken);
-//                windowInformation("Товар успешно добавлен");
-//                serverGoods = http.sendGet();
-//                update.updateOfGoods(goodsCollection);
-//            } catch (Exception e) {
-//                windowError("Введен неверный формат данных");
-//            }
-//        }
-//    };
+    private EventHandler<ActionEvent> addGoodEvent = new EventHandler<ActionEvent>() {
+        @Override
+        public void handle(ActionEvent event) {
+
+            try {
+                String nameOfGood = nameOfGoodAddToShop.getText();
+                int countOfGood = Integer.parseInt(countOfGoodAddToShop.getText());
+                int priceOfGood = Integer.parseInt(priceOfGoodAddToShop.getText());
+
+                Good addGood = new Good(nameOfGood, countOfGood, priceOfGood);
+
+                String json = mapper.writeValueAsString(addGood);
+                StringBuffer result =  HttpRequestService.sendPostAndGetResponse(HttpRequestService.urlConnection.concat("/addGood"), json);
+                if (result.toString().isEmpty()) {
+                    windowInformation("Товар успешно добавлен");
+                } else {
+                    windowInformation(result.toString());
+                }
+                serverGoods = HttpRequestService.sendGet();
+                ShopService.updateOfGoods(goodsCollection);
+            } catch (Exception e) {
+                windowError("Введен неверный формат данных");
+            }
+        }
+    };
 
     private EventHandler<ActionEvent> updateEvent = new EventHandler<ActionEvent>() {
         @Override
@@ -422,27 +426,24 @@ public class AppClient extends Application {
         }
     };
 
-//    private EventHandler<ActionEvent> authorizationEvent = new EventHandler<ActionEvent>() {
-//        @Override
-//        public void handle(ActionEvent event) {
-//            boolean check = true;
-//            String nameAccount = authorizationName.getText();
-//            String passwordAccount = authorizationPassword.getText();
-//            Account account = new Account(nameAccount, passwordAccount);
-//
-//            try {
-//                String json = mapper.writeValueAsString(account);
-//                http.sendPost(HttpConnectionService.urlConnection.concat("/authorization"), json, http.accessToken);
-//            } catch (IOException e) {
-//                windowError("Неверный логин или пароль");
-//                check = false;
-//            }
-//            if (check) {
-//                authorization.close();
-//                windowForAddGoods.show();
-//            }
-//        }
-//    };
+    private EventHandler<ActionEvent> authorizationEvent = event -> {
+        boolean check = true;
+        String nameAccount = authorizationName.getText();
+        String passwordAccount = authorizationPassword.getText();
+        Account account = new Account(nameAccount, passwordAccount);
+
+        try {
+            String json = mapper.writeValueAsString(account);
+            accessToken = HttpRequestService.sendPostAndGetResponse(HttpRequestService.urlConnection.concat("/authorization"), json);
+        } catch (IOException e) {
+            windowError("Неверный логин или пароль");
+            check = false;
+        }
+        if (check) {
+            authorization.close();
+            windowForAddGoods.show();
+        }
+    };
 
     private void windowInformation(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -525,29 +526,29 @@ public class AppClient extends Application {
         return buttonAddGoods;
     }
 
-//    public static Label getLabelNickNameAndPassword() {
-//        return labelNickNameAndPassword;
-//    }
-//
-//    public static Label getLabelLogin() {
-//        return labelLogin;
-//    }
-//
-//    public static TextField getAuthorizationName() {
-//        return authorizationName;
-//    }
-//
-//    public static Label getLabelPassword() {
-//        return labelPassword;
-//    }
-//
-//    public static PasswordField getAuthorizationPassword() {
-//        return authorizationPassword;
-//    }
-//
-//    public static Button getButtonEnter() {
-//        return buttonEnter;
-//    }
+    public static Label getLabelNickNameAndPassword() {
+        return labelNickNameAndPassword;
+    }
+
+    public static Label getLabelLogin() {
+        return labelLogin;
+    }
+
+    public static TextField getAuthorizationName() {
+        return authorizationName;
+    }
+
+    public static Label getLabelPassword() {
+        return labelPassword;
+    }
+
+    public static PasswordField getAuthorizationPassword() {
+        return authorizationPassword;
+    }
+
+    public static Button getButtonEnter() {
+        return buttonEnter;
+    }
 
     public static Button getConnectionUrlAddress() {
         return connectionUrlAddress;

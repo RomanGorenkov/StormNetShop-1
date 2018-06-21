@@ -1,3 +1,4 @@
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.slf4j.Logger;
@@ -50,7 +51,7 @@ public class ShopDao {
             LOGGER.error(e.getMessage(), e);
             return e.getMessage() + " during good saving process";
         }
-        return "Good was successfully saved";
+        return StringUtils.EMPTY;
 
     }
 
