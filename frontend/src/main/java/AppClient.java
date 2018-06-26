@@ -33,6 +33,12 @@ public class AppClient extends Application {
     //фунционал покупки товара
     private static Button addToCartButton = new Button();
     private static Button deleteGood = new Button();
+
+
+
+
+
+
     private static Button buttonCountUp = new Button();
     private static Button buttonCountDown = new Button();
     private static Button buttonOfBuy = new Button();
